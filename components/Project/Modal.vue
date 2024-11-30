@@ -3,12 +3,12 @@
     <form class="flex flex-col gap-2" @submit.prevent="handelSubmit">
       <div class="flex flex-col">
         <label>Project Name:</label>
-        <input name="name" type="text" required />
+        <input name="name" type="text" required :value="project?.name" />
       </div>
 
       <div class="flex flex-col">
         <label>Description:</label>
-        <textarea name="description" />
+        <textarea name="description" :value="project?.description" />
       </div>
 
       <div class="flex w-full justify-between px-5 py-10">
@@ -25,9 +25,14 @@
 </template>
 
 <script setup lang="ts">
+import type { Project } from "~/types/Project";
+
+const emits = defineEmits<{ (e: "close"): void }>();
+const props = defineProps<{ project?: Project }>();
+
 const isOpen = defineModel("isOpen", { default: false });
 
-const { createProject } = useProjects();
+const { createProject, updateProject } = useProjects();
 
 const handelSubmit = async (e: Event) => {
   const data = Object.fromEntries(
@@ -39,10 +44,16 @@ const handelSubmit = async (e: Event) => {
 
   console.log(data);
 
-  await createProject(data.name, data.description);
-
+  if (props.project) {
+    await updateProject(props.project.id, data.name, data.description);
+  } else {
+    await createProject(data.name, data.description);
+  }
   closeModal();
 };
 
-const closeModal = () => (isOpen.value = false);
+const closeModal = () => {
+  emits("close");
+  isOpen.value = false;
+};
 </script>
