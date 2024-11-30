@@ -1,5 +1,5 @@
 <template>
-  <div class="card-shadow flex flex-col gap-2 rounded-2xl bg-surface p-3">
+  <div class="card-shadow flex h-40 flex-col gap-2 rounded-2xl bg-surface p-3">
     <div class="flex justify-between">
       <p class="text-lg font-semibold">{{ project.name }}</p>
       <div class="flex gap-4">
@@ -16,7 +16,7 @@
       </div>
     </div>
 
-    <NuxtLink to="/projects/[id]">
+    <NuxtLink class="flex grow flex-col justify-between" to="/projects/[id]">
       <p class="text-sub">
         {{ project.description }}
       </p>
