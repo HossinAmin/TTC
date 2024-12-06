@@ -8,7 +8,7 @@
       v-for="project in projects"
       class="flex flex-col gap-4"
     >
-      <ProjectCard :project @edit="editProject" />
+      <ProjectCard :project @edit="editProject" @delete="handleDelete" />
     </div>
     <p v-else>loading...</p>
 
@@ -25,6 +25,13 @@
     :project="selectedProject"
     @close="handleClose"
   />
+
+  <CommonConfirmModal
+    v-model:is-open="isConfirmModalOpen"
+    action="delete this project"
+    @ok="confirmProjectDelete"
+    @cancel="handleClose"
+  />
 </template>
 
 <script setup lang="ts">
@@ -33,7 +40,10 @@ import useProjects from "~/composables/useProjects";
 import type { Project } from "~/types/Project";
 
 const isProjectModalOpen = ref(false);
+const isConfirmModalOpen = ref(false);
 const selectedProject = ref<Project>();
+
+const { projects, getProjects, deleteProject } = useProjects();
 
 const editProject = (projectId: string) => {
   // open modal with data filled
@@ -41,11 +51,25 @@ const editProject = (projectId: string) => {
   isProjectModalOpen.value = true;
 };
 
-const handleClose = () => {
-  selectedProject.value = undefined;
+const handleDelete = (projectId: string) => {
+  selectedProject.value = projects.value?.find((item) => item.id === projectId);
+  isConfirmModalOpen.value = true;
 };
 
-const { projects, getProjects, createProject, deleteProject } = useProjects();
+const confirmProjectDelete = () => {
+  if (selectedProject.value?.id) {
+    deleteProject(selectedProject.value.id);
+    handleClose();
+  } else {
+    throw new Error("No project is selected");
+  }
+};
+
+const handleClose = () => {
+  isConfirmModalOpen.value = false;
+  isProjectModalOpen.value = false;
+  selectedProject.value = undefined;
+};
 
 getProjects();
 </script>
