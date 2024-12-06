@@ -16,7 +16,12 @@
       </div>
     </div>
 
-    <NuxtLink class="flex grow flex-col justify-between" to="/projects/[id]">
+    <NuxtLink
+      class="flex grow flex-col justify-between"
+      :to="{
+        path: `/projects/${project.id}`,
+      }"
+    >
       <p class="text-sub">
         {{ project.description }}
       </p>
