@@ -9,6 +9,15 @@ export default function useProjects() {
     projects.value = await $db.select<Project[]>(`select * from Projects`);
   };
 
+  /**
+   * Searches for project with set id in the global state since it is in sync with DB
+   * @param projectId
+   * @returns project with given id if it exits
+   */
+  const getProject = (projectId: string) => {
+    return projects.value?.find((item) => item.id === projectId);
+  };
+
   const createProject = async (name: string, desc?: string) => {
     const id = v7();
 
@@ -38,6 +47,7 @@ export default function useProjects() {
   return {
     projects,
     getProjects,
+    getProject,
     createProject,
     deleteProject,
     updateProject,

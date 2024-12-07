@@ -1,22 +1,25 @@
 <template>
-  <div class="flex flex-col gap-20 px-14 py-16">
+  <div class="flex min-h-screen flex-col gap-20 px-14 py-16">
     <h1 class="text-center text-3xl font-bold">Total time 00:00:00</h1>
 
     <!-- project list -->
-    <div
-      v-if="projects"
-      v-for="project in projects"
-      class="flex flex-col gap-4"
-    >
-      <ProjectCard :project @edit="editProject" @delete="handleDelete" />
+    <div v-if="projects" class="flex flex-grow flex-col gap-4">
+      <ProjectCard
+        v-if="projects.length !== 0"
+        v-for="project in projects"
+        :project
+        @edit="editProject"
+        @delete="handleDelete"
+      />
+      <CommonEmptyIndicator v-else item-name="project" />
     </div>
     <p v-else>loading...</p>
 
     <button
-      class="fixed bottom-3 end-3 flex items-center justify-center rounded-full border border-solid border-black bg-primary-500 p-2 shadow-2xl"
+      class="fixed bottom-10 end-10 flex items-center justify-center rounded-full border border-solid border-black bg-primary-500 p-3 font-bold shadow-2xl"
       @click="isProjectModalOpen = true"
     >
-      <Icon class="text-2xl font-bold" name="ic:round-plus" />
+      <Icon class="text-4xl font-bold" name="ic:round-plus" />
     </button>
   </div>
 
@@ -43,16 +46,15 @@ const isProjectModalOpen = ref(false);
 const isConfirmModalOpen = ref(false);
 const selectedProject = ref<Project>();
 
-const { projects, getProjects, deleteProject } = useProjects();
+const { projects, getProjects, getProject, deleteProject } = useProjects();
 
 const editProject = (projectId: string) => {
-  // open modal with data filled
-  selectedProject.value = projects.value?.find((item) => item.id === projectId);
+  selectedProject.value = getProject(projectId);
   isProjectModalOpen.value = true;
 };
 
 const handleDelete = (projectId: string) => {
-  selectedProject.value = projects.value?.find((item) => item.id === projectId);
+  selectedProject.value = getProject(projectId);
   isConfirmModalOpen.value = true;
 };
 
