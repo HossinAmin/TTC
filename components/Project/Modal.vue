@@ -2,13 +2,18 @@
   <CommonModal v-model:is-open="isOpen">
     <form class="flex flex-col gap-2" @submit.prevent="handelSubmit">
       <div class="flex flex-col">
-        <label>Project Name:</label>
+        <label>Project Name <span class="text-red-500">*</span></label>
         <input name="name" type="text" required :value="project?.name" />
       </div>
 
       <div class="flex flex-col">
-        <label>Description:</label>
+        <label>Description</label>
         <textarea name="description" :value="project?.description" />
+      </div>
+
+      <div class="flex flex-col">
+        <label>Link </label>
+        <input name="link" type="text" required :value="project?.link" />
       </div>
 
       <div class="flex w-full justify-between px-5 py-10">
@@ -16,9 +21,9 @@
           class="rounded-lg bg-red-500 px-10 py-2"
           @click.prevent="closeModal"
         >
-          cancel
+          Cancel
         </button>
-        <button class="rounded-lg bg-primary-500 px-10 py-2">create</button>
+        <button class="rounded-lg bg-primary-500 px-10 py-2">Create</button>
       </div>
     </form>
   </CommonModal>
@@ -39,15 +44,21 @@ const handelSubmit = async (e: Event) => {
     new FormData(e.target as HTMLFormElement).entries(),
   ) as {
     name: string;
+    link?: string;
     description?: string;
   };
 
   console.log(data);
 
   if (props.project) {
-    await updateProject(props.project.id, data.name, data.description);
+    await updateProject(
+      props.project.id,
+      data.name,
+      data.description,
+      data.link,
+    );
   } else {
-    await createProject(data.name, data.description);
+    await createProject(data.name, data.description, data.link);
   }
   closeModal();
 };
