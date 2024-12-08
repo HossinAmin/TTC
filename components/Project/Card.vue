@@ -28,7 +28,7 @@
 
       <div class="flex justify-between">
         <p># tasks 5</p>
-        <p>time 00:00:00</p>
+        <p>time {{ timer.hours }}:{{ timer.minutes }}:{{ timer.seconds }}</p>
       </div>
     </NuxtLink>
   </div>
@@ -42,7 +42,15 @@ defineEmits<{
   (e: "delete", id: string): void;
 }>();
 
-defineProps<{
+const props = defineProps<{
   project: Project;
 }>();
+
+const { time, pad } = useTimer(props.project.time);
+
+const timer = computed(() => ({
+  hours: pad(time.value.h),
+  minutes: pad(time.value.m),
+  seconds: pad(time.value.s),
+}));
 </script>

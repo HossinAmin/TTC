@@ -12,6 +12,8 @@ export default function useProjects() {
   const getProject = async (
     projectId: string,
   ): Promise<Project | undefined> => {
+    projects.value = null;
+
     const results = await $db.select<Project[]>(
       "SELECT * FROM Projects WHERE id = $1",
       [projectId],
@@ -24,7 +26,7 @@ export default function useProjects() {
     const id = v7();
 
     await $db.execute(
-      "INSERT INTO projects (id, name, description) VALUES ($1, $2, $3)",
+      "INSERT INTO Projects (id, name, description) VALUES ($1, $2, $3)",
       [id, name, desc],
     );
 
@@ -32,8 +34,7 @@ export default function useProjects() {
   };
 
   const deleteProject = async (id: string) => {
-    await $db.execute("DELETE FROM projects WHERE id = $1", [id]);
-    projects.value = null;
+    await $db.execute("DELETE FROM Projects WHERE id = $1", [id]);
     await getProjects();
   };
 
@@ -42,8 +43,14 @@ export default function useProjects() {
       "UPDATE Projects SET name = $1, description = $2 WHERE id = $3",
       [name, desc, id],
     );
-    projects.value = null;
     await getProjects();
+  };
+
+  const updateProjectTime = async (id: string, time: number) => {
+    await $db.execute("UPDATE Projects SET time = $2 WHERE id = $1", [
+      id,
+      time,
+    ]);
   };
 
   return {
@@ -53,5 +60,6 @@ export default function useProjects() {
     createProject,
     deleteProject,
     updateProject,
+    updateProjectTime,
   };
 }
