@@ -47,7 +47,6 @@ const props = defineProps<{
 let timerId: NodeJS.Timeout;
 
 const { seconds, time, play, pad } = useTimer(props.task.time);
-console.log(time.value);
 
 const { updateTaskTime } = useTasks(props.task.project);
 
