@@ -48,13 +48,13 @@ const selectedProject = ref<Project>();
 
 const { projects, getProjects, getProject, deleteProject } = useProjects();
 
-const editProject = (projectId: string) => {
-  selectedProject.value = getProject(projectId);
+const editProject = async (projectId: string) => {
+  selectedProject.value = await getProject(projectId);
   isProjectModalOpen.value = true;
 };
 
-const handleDelete = (projectId: string) => {
-  selectedProject.value = getProject(projectId);
+const handleDelete = async (projectId: string) => {
+  selectedProject.value = await getProject(projectId);
   isConfirmModalOpen.value = true;
 };
 

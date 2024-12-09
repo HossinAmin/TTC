@@ -7,11 +7,13 @@
           class="cursor-pointer text-xl active:text-footer"
           name="ic:round-mode-edit-outline"
           :size="24"
+          @click="$emit('edit')"
         />
         <Icon
           class="cursor-pointer text-xl active:text-footer"
           name="ic:round-delete-forever"
           :size="24"
+          @click="$emit('delete')"
         />
       </div>
     </div>
@@ -39,6 +41,11 @@
 <script setup lang="ts">
 import useTasks from "~/composables/useTasks";
 import type { Task } from "~/types/Tasks";
+
+defineEmits<{
+  edit: [];
+  delete: [];
+}>();
 
 const props = defineProps<{
   task: Task;

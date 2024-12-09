@@ -20,7 +20,13 @@
     </div>
 
     <template v-if="tasks">
-      <TasksCard v-if="tasks.length !== 0" v-for="task in tasks" :task />
+      <TasksCard
+        v-if="tasks.length !== 0"
+        v-for="task in tasks"
+        :task
+        @edit="handleEdit(task)"
+        @delete="openDeleteModal(task)"
+      />
       <CommonEmptyIndicator v-else item-name="Tasks" />
     </template>
     <p v-else>Loading ...</p>
@@ -28,24 +34,37 @@
 
   <button
     class="fixed bottom-10 end-10 flex items-center justify-center rounded-full border border-solid border-black bg-primary-500 p-3 font-bold shadow-2xl"
-    @click="createTask('Task 1')"
+    @click="handleCreateTask"
   >
     <Icon class="text-4xl font-bold" name="ic:round-plus" />
   </button>
+
+  <TasksModal v-model:is-open="isTaskModalOpen" :task="selectedTask" />
+  <CommonConfirmModal
+    v-model:is-open="isConfirmModalOpen"
+    action="delete this task"
+    @ok="handleDelete()"
+    @cancel="isConfirmModalOpen = false"
+  />
 </template>
 
 <script setup lang="ts">
 import useTasks from "~/composables/useTasks";
 import { open } from "@tauri-apps/plugin-shell";
 import type { Project } from "~/types/Project";
+import type { Task } from "~/types/Tasks";
 
 const project = ref<Project>();
+const isTaskModalOpen = ref(false);
+const isConfirmModalOpen = ref(false);
+
+const selectedTask = ref<Task>();
 
 const route = useRoute();
 
 const { getProject } = useProjects();
 
-const { tasks, totalTime, getTasks, createTask } = useTasks(
+const { tasks, totalTime, getTasks, deleteTask } = useTasks(
   route.params.id as string,
 );
 
@@ -56,6 +75,28 @@ const timer = computed(() => ({
   minutes: pad(time.value.m),
   seconds: pad(time.value.s),
 }));
+
+const handleEdit = (task: Task) => {
+  isTaskModalOpen.value = true;
+  selectedTask.value = task;
+};
+
+const handleDelete = () => {
+  if (selectedTask.value?.id) {
+    deleteTask(selectedTask.value?.id);
+    isConfirmModalOpen.value = false;
+  }
+};
+
+const handleCreateTask = () => {
+  selectedTask.value = undefined;
+  isTaskModalOpen.value = true;
+};
+
+const openDeleteModal = (task: Task) => {
+  isConfirmModalOpen.value = true;
+  selectedTask.value = task;
+};
 
 onMounted(async () => {
   project.value = await getProject(route.params.id as string);
