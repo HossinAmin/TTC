@@ -23,19 +23,20 @@ export default function useTasks(projectId: string) {
   };
 
   const getTask = async (taskId: string): Promise<Task | undefined> => {
-    const results = await $db.select<Task[]>("SELECT * FROM Tasks WHERE $1", [
-      taskId,
-    ]);
+    const results = await $db.select<Task[]>(
+      "SELECT * FROM Tasks WHERE id = $1",
+      [taskId],
+    );
 
     return results?.[0];
   };
 
-  const createTask = async (name: string, desc?: string) => {
+  const createTask = async (name: string, desc?: string, link?: string) => {
     const id = v7();
 
     await $db.execute(
-      "INSERT INTO Tasks (id, name, description, project) VALUES ($1, $2, $3, $4)",
-      [id, name, desc, projectId],
+      "INSERT INTO Tasks (id, name, description, project, link) VALUES ($1, $2, $3, $4, $5)",
+      [id, name, desc ?? null, projectId, link ?? null],
     );
 
     await getTasks();
@@ -46,10 +47,15 @@ export default function useTasks(projectId: string) {
     await getTasks();
   };
 
-  const updateTask = async (id: string, name: string, desc?: string) => {
+  const updateTask = async (
+    id: string,
+    name: string,
+    desc?: string,
+    link?: string,
+  ) => {
     await $db.execute(
-      "UPDATE Tasks SET name = $1, description = $2 WHERE id = $3",
-      [name, desc, id],
+      "UPDATE Tasks SET name = $2, description = $3, link = $4 WHERE id = $1",
+      [id, name, desc, link],
     );
     await getTasks();
   };
