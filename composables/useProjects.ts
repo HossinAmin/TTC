@@ -37,7 +37,7 @@ export default function useProjects() {
     await getProjects();
   };
 
-  const updateProject = async (
+  const editProject = async (
     id: string,
     name: string,
     desc?: string,
@@ -50,11 +50,15 @@ export default function useProjects() {
     await getProjects();
   };
 
-  const updateProjectTime = async (id: string, time: number) => {
-    await $db.execute("UPDATE Projects SET time = $2 WHERE id = $1", [
-      id,
-      time,
-    ]);
+  const updateProject = async (
+    id: string,
+    time: number,
+    tasks_count: number,
+  ) => {
+    await $db.execute(
+      "UPDATE Projects SET time = $2, tasks_count = $3 WHERE id = $1",
+      [id, time, tasks_count],
+    );
   };
 
   return {
@@ -63,7 +67,7 @@ export default function useProjects() {
     getProject,
     createProject,
     deleteProject,
+    editProject,
     updateProject,
-    updateProjectTime,
   };
 }

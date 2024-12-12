@@ -37,7 +37,7 @@ const props = defineProps<{ project?: Project }>();
 
 const isOpen = defineModel("isOpen", { default: false });
 
-const { createProject, updateProject } = useProjects();
+const { createProject, editProject } = useProjects();
 
 const handelSubmit = async (e: Event) => {
   const data = Object.fromEntries(
@@ -51,12 +51,7 @@ const handelSubmit = async (e: Event) => {
   console.log(data);
 
   if (props.project) {
-    await updateProject(
-      props.project.id,
-      data.name,
-      data.description,
-      data.link,
-    );
+    await editProject(props.project.id, data.name, data.description, data.link);
   } else {
     await createProject(data.name, data.description, data.link);
   }

@@ -11,7 +11,7 @@ export default function useTasks(projectId: string) {
       }, 0) ?? 0,
   );
 
-  const { updateProjectTime } = useProjects();
+  const { updateProject } = useProjects();
   const { $db } = useNuxtApp();
 
   const getTasks = async () => {
@@ -47,7 +47,7 @@ export default function useTasks(projectId: string) {
     await getTasks();
   };
 
-  const updateTask = async (
+  const editTask = async (
     id: string,
     name: string,
     desc?: string,
@@ -65,7 +65,7 @@ export default function useTasks(projectId: string) {
   };
 
   watch(tasks, () => {
-    updateProjectTime(projectId, totalTime.value);
+    updateProject(projectId, totalTime.value, tasks.value?.length ?? 0);
   });
 
   return {
@@ -75,7 +75,7 @@ export default function useTasks(projectId: string) {
     getTask,
     createTask,
     deleteTask,
-    updateTask,
+    editTask,
     updateTaskTime,
   };
 }

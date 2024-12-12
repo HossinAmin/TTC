@@ -38,7 +38,7 @@ const props = defineProps<{ task?: Task }>();
 const isOpen = defineModel("isOpen", { default: false });
 const route = useRoute();
 
-const { createTask, updateTask } = useTasks(route.params.id as string);
+const { createTask, editTask } = useTasks(route.params.id as string);
 
 const handelSubmit = async (e: Event) => {
   const data = Object.fromEntries(
@@ -52,7 +52,7 @@ const handelSubmit = async (e: Event) => {
   console.log(data);
 
   if (props.task) {
-    await updateTask(props.task.id, data.name, data.description, data.link);
+    await editTask(props.task.id, data.name, data.description, data.link);
   } else {
     await createTask(data.name, data.description, data.link);
   }
