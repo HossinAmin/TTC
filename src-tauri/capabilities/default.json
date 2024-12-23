@@ -8,6 +8,11 @@
     "sql:default",
     "sql:allow-execute",
     "shell:default",
-    "core:app:allow-default-window-icon"
+    "core:app:allow-default-window-icon",
+    "fs:default",
+    "fs:allow-read-file",
+    "fs:allow-read-dir",
+    "core:path:allow-resolve",
+    "fs:allow-resource-read-recursive"
   ]
 }

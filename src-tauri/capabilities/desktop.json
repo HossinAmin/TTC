@@ -2,5 +2,10 @@
   "identifier": "desktop-capability",
   "platforms": ["macOS", "windows", "linux"],
   "windows": ["main"],
-  "permissions": ["positioner:default"]
+  "permissions": [
+    "positioner:default",
+    "fs:default",
+    "fs:allow-read-file",
+    "fs:allow-read-dir"
+  ]
 }
