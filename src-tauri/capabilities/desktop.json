@@ -6,6 +6,12 @@
     "positioner:default",
     "fs:default",
     "fs:allow-read-file",
-    "fs:allow-read-dir"
+    "fs:allow-read-dir",
+    "core:window:allow-close",
+    "core:window:allow-set-visible-on-all-workspaces",
+    "core:window:allow-hide",
+    "core:window:allow-show",
+    "core:window:allow-destroy",
+    "core:window:allow-set-focus"
   ]
 }
