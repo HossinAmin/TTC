@@ -24,6 +24,8 @@
         v-if="tasks.length !== 0"
         v-for="task in tasks"
         :task
+        :playingTaskId
+        @play="handlePlay"
         @edit="handleEdit(task)"
         @delete="openDeleteModal(task)"
       />
@@ -59,6 +61,7 @@ const isTaskModalOpen = ref(false);
 const isConfirmModalOpen = ref(false);
 
 const selectedTask = ref<Task>();
+const playingTaskId = ref<string>();
 
 const route = useRoute();
 
@@ -75,6 +78,14 @@ const timer = computed(() => ({
   minutes: pad(time.value.m),
   seconds: pad(time.value.s),
 }));
+
+const handlePlay = (taskId: string) => {
+  if (taskId === playingTaskId.value) {
+    playingTaskId.value = undefined;
+  } else {
+    playingTaskId.value = taskId;
+  }
+};
 
 const handleEdit = (task: Task) => {
   isTaskModalOpen.value = true;

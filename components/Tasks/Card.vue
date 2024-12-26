@@ -26,7 +26,10 @@
       </p>
       <button
         class="flex items-center justify-center rounded-lg bg-white text-center hover:bg-slate-100 active:bg-slate-200"
-        @click="play = !play"
+        @click="
+          play = !play;
+          $emit('play', task.id);
+        "
       >
         <Icon
           class="text-primary-500 hover:text-primary-600 active:text-primary-400"
@@ -45,13 +48,13 @@ import type { Task } from "~/types/Tasks";
 defineEmits<{
   edit: [];
   delete: [];
+  play: [id: string];
 }>();
 
 const props = defineProps<{
   task: Task;
+  playingTaskId?: string;
 }>();
-
-let timerId: NodeJS.Timeout;
 
 const { seconds, time, play, pad } = useTimer(props.task.time);
 
@@ -63,7 +66,19 @@ const timer = computed(() => ({
   seconds: pad(time.value.s),
 }));
 
-// save time in DB on pause
+// pause the task if another one starts playing
+watch(
+  () => props.playingTaskId,
+  () => {
+    if (props.playingTaskId !== props.task.id && play.value) {
+      play.value = false;
+    }
+  },
+);
+
+let timerId: NodeJS.Timeout;
+
+// sync time in DB
 watch(play, () => {
   if (!play.value) {
     clearInterval(timerId);
