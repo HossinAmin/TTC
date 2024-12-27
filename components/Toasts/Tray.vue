@@ -3,7 +3,7 @@
     <TransitionGroup name="toast">
       <div
         v-for="toast in toasts"
-        class="flex flex-col gap-2 rounded-lg bg-surface p-3"
+        class="flex min-w-96 flex-col gap-2 rounded-lg bg-surface p-3"
         :key="toast.id"
       >
         <div v-if="toast?.title" class="flex items-center gap-2">
@@ -13,6 +13,14 @@
         <p class="text-sm text-sub">
           {{ toast?.description }}
         </p>
+
+        <button
+          v-if="!toast?.timeout"
+          class="w-fit self-end rounded bg-primary-500 px-2 py-1 text-xs"
+          @click="removeToast(toast.id)"
+        >
+          okay
+        </button>
       </div>
     </TransitionGroup>
   </div>
@@ -21,17 +29,23 @@
 <script setup lang="ts">
 import useToast from "~/composables/useToast";
 
-const { toasts } = useToast();
+const { toasts, removeToast } = useToast();
 </script>
 
 <style scoped>
+.toast-move,
 .toast-enter-active,
 .toast-leave-active {
   transition: all 0.5s ease;
 }
+
 .toast-enter-from,
 .toast-leave-to {
   opacity: 0;
   transform: translateX(-100%);
+}
+
+.toast-leave-active {
+  position: absolute;
 }
 </style>
