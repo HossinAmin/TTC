@@ -34,7 +34,7 @@ export default defineNuxtPlugin(async () => {
 
   /** Changes system tray icon to show that there is notification */
   const setTrayIconNoti = async () => {
-    const image = await Image.fromPath("../assets/images/noti_icon.png");
+    const image = await Image.fromPath("../assets/images/notify_logo.png");
     tray?.setIcon(image);
   };
 
