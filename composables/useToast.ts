@@ -24,13 +24,16 @@ export default function useToast() {
     }
 
     const id = v7();
-    toasts.value.push({
-      id,
-      title,
-      description,
-      sound,
-      timeout,
-    });
+    toasts.value = [
+      ...toasts.value,
+      {
+        id,
+        title,
+        description,
+        sound,
+        timeout,
+      },
+    ];
 
     if (timeout) {
       setTimeout(() => {
@@ -44,5 +47,6 @@ export default function useToast() {
       return toast.id !== id;
     });
   };
+
   return { toasts, addToast, removeToast };
 }
