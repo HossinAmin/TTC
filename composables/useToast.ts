@@ -7,13 +7,12 @@ type Toast = {
   description?: string;
   sound?: boolean;
   timeout?: number;
-  hide?: boolean;
 };
 
 export default function useToast() {
   const toasts = useState<Toast[]>("toasts", () => []);
 
-  const add = (
+  const addToast = (
     title?: string,
     description?: string,
     sound?: boolean,
@@ -35,11 +34,15 @@ export default function useToast() {
 
     if (timeout) {
       setTimeout(() => {
-        toasts.value = toasts.value.filter((toast) => {
-          return toast.id !== id;
-        });
+        removeToast(id);
       }, timeout);
     }
   };
-  return { toasts, add };
+
+  const removeToast = (id: string) => {
+    toasts.value = toasts.value.filter((toast) => {
+      return toast.id !== id;
+    });
+  };
+  return { toasts, addToast, removeToast };
 }
