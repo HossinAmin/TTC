@@ -6,6 +6,8 @@ use tauri::{
     Manager,
 };
 
+use tauri_plugin_sql::{Migration, MigrationKind};
+
 struct AppData {
     tray: TrayIcon,
 }
@@ -33,11 +35,45 @@ fn get_tray_id(state: tauri::State<AppData>) -> std::string::String {
 }
 
 pub fn run() {
+    let migrations = vec![Migration {
+        version: 1,
+        description: "create_initial_tables",
+        sql: r###"
+            CREATE TABLE "Projects" (
+                "id" TEXT NOT NULL UNIQUE,
+                "created_at" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                "name" TEXT NOT NULL,
+                "description" TEXT,
+                "link" TEXT,
+                "time" INTEGER NOT NULL DEFAULT 0,
+                "tasks" INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY("id")
+            );
+            
+            CREATE TABLE "Tasks" (
+                "id" TEXT NOT NULL UNIQUE,
+                "created_at" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                "name" TEXT NOT NULL,
+                "description" TEXT,
+                "link" TEXT,
+                "time" INTEGER NOT NULL DEFAULT 0,
+                "project" TEXT NOT NULL,
+                FOREIGN KEY("project") REFERENCES "Projects"("id"),
+                PRIMARY KEY("id")
+            );
+            "###,
+        kind: MigrationKind::Up,
+    }];
+
     tauri::Builder::default()
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_positioner::init())
         .plugin(tauri_plugin_shell::init())
-        .plugin(tauri_plugin_sql::Builder::new().build())
+        .plugin(
+            tauri_plugin_sql::Builder::new()
+                .add_migrations("sqlite:mybdz.db", migrations)
+                .build(),
+        )
         .invoke_handler(tauri::generate_handler![check_mouse_coords, get_tray_id])
         .on_window_event(|window, event| match event {
             tauri::WindowEvent::CloseRequested { api, .. } => {
