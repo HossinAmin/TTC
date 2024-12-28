@@ -33,8 +33,14 @@ export default defineNuxtPlugin(async () => {
   tray?.setIcon(originalImage);
 
   /** Changes system tray icon to show that there is notification */
-  const setTrayIconNoti = async () => {
+  const setTrayIconNotify = async () => {
     const image = await Image.fromPath("../assets/images/notify_logo.png");
+    tray?.setIcon(image);
+  };
+
+  /** Changes system tray icon to show that there is notification */
+  const setTrayIconPlay = async () => {
+    const image = await Image.fromPath("../assets/images/play_logo.png");
     tray?.setIcon(image);
   };
 
@@ -45,7 +51,8 @@ export default defineNuxtPlugin(async () => {
 
   return {
     provide: {
-      setTrayIconNoti,
+      setTrayIconPlay,
+      setTrayIconNotify,
       resetTrayIcon,
     },
   };
