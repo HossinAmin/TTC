@@ -77,7 +77,7 @@ watch(
 );
 
 let timerId: NodeJS.Timeout;
-const { startTracking, stopTracking } = useActivityTracker();
+const { isActive, startTracking, stopTracking } = useActivityTracker();
 // sync time in DB
 watch(play, () => {
   if (!play.value) {
@@ -89,6 +89,13 @@ watch(play, () => {
     timerId = setInterval(() => {
       updateTaskTime(props.task.id, seconds.value);
     }, 30000);
+  }
+});
+
+watchEffect(() => {
+  if (!isActive.value) {
+    console.log("inactive");
+    play.value = false;
   }
 });
 

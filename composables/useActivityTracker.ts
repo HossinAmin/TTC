@@ -15,6 +15,8 @@ export default function useActivityTracker() {
   const { $setTrayIconPlay, $resetTrayIcon } = useNuxtApp();
 
   const startTracking = async () => {
+    coords = await invoke<{ x: number; y: number }>("check_mouse_coords");
+
     $setTrayIconPlay();
     intervalId = setInterval(
       async () => {
