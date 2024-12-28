@@ -77,13 +77,15 @@ watch(
 );
 
 let timerId: NodeJS.Timeout;
-
+const { startTracking, stopTracking } = useActivityTracker();
 // sync time in DB
 watch(play, () => {
   if (!play.value) {
     clearInterval(timerId);
     updateTaskTime(props.task.id, seconds.value);
+    stopTracking();
   } else {
+    startTracking();
     timerId = setInterval(() => {
       updateTaskTime(props.task.id, seconds.value);
     }, 30000);
@@ -92,5 +94,6 @@ watch(play, () => {
 
 onUnmounted(() => {
   clearInterval(timerId);
+  stopTracking();
 });
 </script>

@@ -5,21 +5,52 @@ import { invoke } from "@tauri-apps/api/core";
  * include key stocks in tracking
  */
 export default function useActivityTracker() {
-  // Your mouse inactivity check
+  const isActive = useState("isActive", () => true);
+
+  let intervalId: NodeJS.Timeout | undefined;
+  // Your mouse coordinates
   let coords = { x: -1, y: -1 };
 
-  const id = setInterval(async () => {
-    const newCoords = await invoke<{ x: number; y: number }>(
-      "check_mouse_coords",
-    );
+  const { addToast } = useToast();
+  const { $setTrayIconPlay, $resetTrayIcon } = useNuxtApp();
 
-    if (coords.x === newCoords.x && coords.y === newCoords.y) {
-      console.log("inactive user");
-    } else {
-      coords = newCoords;
-    }
-  }, 1000); // 5 minutes
+  const startTracking = async () => {
+    $setTrayIconPlay();
+    intervalId = setInterval(
+      async () => {
+        const newCoords = await invoke<{ x: number; y: number }>(
+          "check_mouse_coords",
+        );
+
+        if (coords.x === newCoords.x && coords.y === newCoords.y) {
+          isActive.value = false;
+          addToast(
+            "User Inactive",
+            "The user have been inactive for 5 minus while task timer is on.",
+            true,
+          );
+        } else {
+          isActive.value = true;
+          coords = newCoords;
+        }
+      },
+      1000 * 60 * 5,
+    ); // 5 minutes
+  };
+
+  const stopTracking = () => {
+    $resetTrayIcon();
+    coords = { x: -1, y: -1 };
+    isActive.value = true;
+    clearInterval(intervalId);
+  };
 
   // Cleanup on component unmount
-  onUnmounted(() => clearInterval(id));
+  onUnmounted(() => stopTracking());
+
+  return {
+    isActive,
+    startTracking,
+    stopTracking,
+  };
 }
