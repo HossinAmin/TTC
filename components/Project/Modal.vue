@@ -13,7 +13,7 @@
 
       <div class="flex flex-col">
         <label>Link </label>
-        <input name="link" type="text" required :value="project?.link" />
+        <input name="link" type="text" :value="project?.link" />
       </div>
 
       <div class="flex w-full justify-between px-5 py-10">
