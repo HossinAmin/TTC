@@ -25,6 +25,7 @@
     }
   },
   "bundle": {
+    "resources": ["assets/images/*.png"],
     "active": true,
     "targets": "deb",
     "icon": [
