@@ -40,26 +40,26 @@ pub fn run() {
         description: "create_initial_tables",
         sql: r###"
             CREATE TABLE "Projects" (
-                "id" TEXT NOT NULL UNIQUE,
-                "created_at" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                "name" TEXT NOT NULL,
-                "description" TEXT,
-                "link" TEXT,
-                "time" INTEGER NOT NULL DEFAULT 0,
-                "tasks" INTEGER NOT NULL DEFAULT 0,
+                "id"	TEXT NOT NULL UNIQUE,
+                "created_at"	TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                "name"	TEXT NOT NULL,
+                "description"	TEXT,
+                "link"	TEXT,
+                "time"	INTEGER NOT NULL DEFAULT 0,
+                "tasks_count"	INTEGER NOT NULL DEFAULT 0,
                 PRIMARY KEY("id")
             );
             
             CREATE TABLE "Tasks" (
-                "id" TEXT NOT NULL UNIQUE,
-                "created_at" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                "name" TEXT NOT NULL,
-                "description" TEXT,
-                "link" TEXT,
-                "time" INTEGER NOT NULL DEFAULT 0,
-                "project" TEXT NOT NULL,
-                FOREIGN KEY("project") REFERENCES "Projects"("id"),
-                PRIMARY KEY("id")
+                "id"	TEXT NOT NULL UNIQUE,
+                "created_at"	TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                "name"	TEXT NOT NULL,
+                "description"	TEXT,
+                "link"	TEXT,
+                "time"	INTEGER NOT NULL DEFAULT 0,
+                "project"	TEXT NOT NULL,
+                PRIMARY KEY("id"),
+                FOREIGN KEY("project") REFERENCES "Projects"("id")
             );
             "###,
         kind: MigrationKind::Up,
