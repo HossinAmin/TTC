@@ -2,7 +2,7 @@
   <CommonModal v-model:is-open="isOpen">
     <form class="flex flex-col gap-2" @submit.prevent="handelSubmit">
       <div class="flex flex-col">
-        <label>Task Name <span class="text-red-500">*</span></label>
+        <label>Task Name <span class="text-error">*</span></label>
         <input name="name" type="text" required :value="task?.name" />
       </div>
 
@@ -18,12 +18,12 @@
 
       <div class="flex w-full justify-between px-5 py-10">
         <button
-          class="rounded-lg bg-red-500 px-10 py-2"
+          class="rounded-lg bg-error px-10 py-2"
           @click.prevent="closeModal"
         >
           Cancel
         </button>
-        <button class="rounded-lg bg-primary-500 px-10 py-2">Create</button>
+        <button class="rounded-lg bg-primary px-10 py-2">Create</button>
       </div>
     </form>
   </CommonModal>

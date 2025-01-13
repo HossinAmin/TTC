@@ -1,16 +1,18 @@
 <template>
-  <div class="flex w-full flex-col gap-4 rounded-lg bg-surface p-4">
+  <div
+    class="flex w-full flex-col gap-4 rounded-lg border border-solid border-border bg-surface p-4"
+  >
     <div class="flex items-center justify-between">
       <p>{{ task.name }}</p>
       <div class="flex gap-2">
         <Icon
-          class="cursor-pointer text-xl active:text-footer"
+          class="cursor-pointer text-xl active:text-text-lighter"
           name="ic:round-mode-edit-outline"
           :size="24"
           @click="$emit('edit')"
         />
         <Icon
-          class="cursor-pointer text-xl active:text-footer"
+          class="cursor-pointer text-xl active:text-text-lighter"
           name="ic:round-delete-forever"
           :size="24"
           @click="$emit('delete')"
@@ -32,7 +34,7 @@
         "
       >
         <Icon
-          class="text-primary-500 hover:text-primary-600 active:text-primary-400"
+          class="text-primary hover:text-primary-dark active:text-primary-light"
           :size="32"
           :name="!play ? 'ic:round-play-arrow' : 'ic:round-pause'"
         />

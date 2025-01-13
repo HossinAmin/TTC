@@ -5,13 +5,13 @@
 
       <div class="flex w-full justify-between px-5 py-5">
         <button
-          class="rounded-lg bg-red-500 px-10 py-2 capitalize"
+          class="rounded-lg bg-error px-10 py-2 capitalize"
           @click="$emit('cancel')"
         >
           cancel
         </button>
         <button
-          class="rounded-lg bg-primary-500 px-10 py-2 capitalize"
+          class="rounded-lg bg-primary px-10 py-2 capitalize"
           @click="$emit('ok')"
         >
           Okay

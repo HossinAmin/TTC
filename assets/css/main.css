@@ -9,15 +9,15 @@
 }
 
 body {
-  background-color: theme(colors.background);
+  background-color: theme("colors.background");
   color: white;
 }
 
 input,
 textarea {
-  @apply w-full rounded-md border border-primary-700 bg-surface px-3 py-2 text-main outline-none transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50;
+  @apply w-full rounded-md border border-border bg-surface px-3 py-2 text-text outline-none transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50;
 
   &:focus {
-    @apply border-primary-500;
+    @apply border-primary;
   }
 }

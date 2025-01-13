@@ -10,13 +10,13 @@
           <Icon name="ic:outline-info" :size="24" />
           <p>{{ toast.title }}</p>
         </div>
-        <p class="text-sm text-sub">
+        <p class="text-sm text-text-light">
           {{ toast?.description }}
         </p>
 
         <button
           v-if="!toast?.timeout"
-          class="w-fit self-end rounded bg-primary-500 px-2 py-1 text-xs"
+          class="w-fit self-end rounded bg-primary px-2 py-1 text-xs"
           @click="removeToast(toast.id)"
         >
           okay
