@@ -3,6 +3,7 @@ import type { Project } from "~/types/Project";
 
 export default function useProjects() {
   const projects = useState<Project[] | null>("projects");
+  const currentProject = useState<Project | undefined>("current-project");
   const { $db } = useNuxtApp();
 
   const getProjects = async () => {
@@ -63,6 +64,7 @@ export default function useProjects() {
 
   return {
     projects,
+    currentProject,
     getProjects,
     getProject,
     createProject,
