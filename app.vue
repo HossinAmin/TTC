@@ -3,6 +3,7 @@
     <NuxtPage />
   </NuxtLayout>
   <ToastsTray />
+  <CommonConfirmModal />
 </template>
 
 <script setup lang="ts">

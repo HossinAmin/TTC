@@ -1,6 +1,6 @@
 <template>
   <div class="flex min-h-screen flex-col">
-    <nav class="bg-surface flex items-center justify-between p-2">
+    <nav class="flex items-center justify-between bg-surface p-2">
       <button class="flex" @click="isDrawerOpen = true">
         <Icon name="ic:round-menu" :size="32" />
       </button>
@@ -74,13 +74,6 @@
       :project="currentProject"
       @close="isProjectModalOpen = false"
     />
-
-    <CommonConfirmModal
-      v-model:is-open="isConfirmModalOpen"
-      action="delete this project"
-      @ok="confirmProjectDelete"
-      @cancel="handleClose"
-    />
   </div>
 </template>
 
@@ -90,12 +83,25 @@ import SideBar from "~/components/common/SideBar.vue";
 
 const isDrawerOpen = ref(false);
 const isProjectModalOpen = ref(false);
-const isConfirmModalOpen = ref(false);
 
 const router = useRouter();
 const route = useRoute();
 const { projects, currentProject, getProjects, getProject, deleteProject } =
   useProjects();
+const { show } = useConfModal();
+
+const handleSelect = (value: string) => {
+  if (value === "EDIT") {
+    isProjectModalOpen.value = true;
+  } else if (value === "DELETE") {
+    show("delete this project", confirmProjectDelete);
+  }
+};
+
+const handleClose = () => {
+  isProjectModalOpen.value = false;
+  currentProject.value = undefined;
+};
 
 const confirmProjectDelete = () => {
   if (currentProject.value?.id) {
@@ -104,20 +110,6 @@ const confirmProjectDelete = () => {
     router.replace("/projects");
   } else {
     throw new Error("No project is selected");
-  }
-};
-
-const handleClose = () => {
-  isConfirmModalOpen.value = false;
-  isProjectModalOpen.value = false;
-  currentProject.value = undefined;
-};
-
-const handleSelect = (value: string) => {
-  if (value === "EDIT") {
-    isProjectModalOpen.value = true;
-  } else if (value === "DELETE") {
-    isConfirmModalOpen.value = true;
   }
 };
 

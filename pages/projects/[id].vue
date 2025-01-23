@@ -38,12 +38,6 @@
   </button>
 
   <TasksModal v-model:is-open="isTaskModalOpen" :task="selectedTask" />
-  <CommonConfirmModal
-    v-model:is-open="isConfirmModalOpen"
-    action="delete this task"
-    @ok="handleDelete()"
-    @cancel="isConfirmModalOpen = false"
-  />
 </template>
 
 <script setup lang="ts">
@@ -51,7 +45,6 @@ import useTasks from "~/composables/useTasks";
 import type { Task } from "~/types/Tasks";
 
 const isTaskModalOpen = ref(false);
-const isConfirmModalOpen = ref(false);
 
 const selectedTask = ref<Task>();
 const playingTaskId = ref<string>();
@@ -59,6 +52,7 @@ const playingTaskId = ref<string>();
 const route = useRoute();
 
 const { currentProject } = useProjects();
+const { show } = useConfModal();
 
 const { tasks, totalTime, getTasks, deleteTask } = useTasks(
   route.params.id as string,
@@ -85,21 +79,14 @@ const handleEdit = (task: Task) => {
   selectedTask.value = task;
 };
 
-const handleDelete = () => {
-  if (selectedTask.value?.id) {
-    deleteTask(selectedTask.value?.id);
-    isConfirmModalOpen.value = false;
-  }
-};
-
 const handleCreateTask = () => {
   selectedTask.value = undefined;
   isTaskModalOpen.value = true;
 };
 
 const openDeleteModal = (task: Task) => {
-  isConfirmModalOpen.value = true;
   selectedTask.value = task;
+  show("delete this task", () => deleteTask(task.id));
 };
 
 onMounted(async () => {
