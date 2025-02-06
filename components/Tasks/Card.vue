@@ -6,6 +6,14 @@
       <p>{{ task.name }}</p>
       <div class="flex gap-2">
         <Icon
+          v-if="play"
+          class="cursor-pointer text-xl active:text-text-lighter"
+          name="fluent:picture-in-picture-enter-20-filled"
+          :size="24"
+          @click="$emit('openFloatingTimer')"
+        />
+
+        <Icon
           class="cursor-pointer text-xl active:text-text-lighter"
           name="ic:round-mode-edit-outline"
           :size="24"
@@ -22,16 +30,13 @@
 
     <p>{{ task.description }}</p>
 
-    <div class="flex items-center justify-end gap-4">
+    <div v-show="!hideTime" class="flex items-center justify-end gap-4">
       <p class="text-xl">
         {{ timer.hours }}:{{ timer.minutes }}:{{ timer.seconds }}
       </p>
       <button
         class="flex items-center justify-center rounded-lg bg-white text-center hover:bg-slate-100 active:bg-slate-200"
-        @click="
-          play = !play;
-          $emit('play', task.id);
-        "
+        @click="toggleTimer"
       >
         <Icon
           class="text-primary hover:text-primary-dark active:text-primary-light"
@@ -47,20 +52,22 @@
 import useTasks from "~/composables/useTasks";
 import type { Task } from "~/types/Tasks";
 
-defineEmits<{
+const emit = defineEmits<{
   edit: [];
   delete: [];
-  play: [id: string];
+  play: [];
+  openFloatingTimer: [];
 }>();
 
 const props = defineProps<{
   task: Task;
   playingTaskId?: string;
+  hideTime?: boolean;
 }>();
 
 const { seconds, time, play, pad } = useTimer(props.task.time);
-
 const { updateTaskTime } = useTasks(props.task.project);
+const { isActive, startTracking, stopTracking } = useActivityTracker();
 
 const timer = computed(() => ({
   hours: pad(time.value.h),
@@ -68,18 +75,26 @@ const timer = computed(() => ({
   seconds: pad(time.value.s),
 }));
 
-// pause the task if another one starts playing
+const toggleTimer = () => {
+  play.value = !play.value;
+  emit("play");
+};
+
 watch(
-  () => props.playingTaskId,
-  () => {
-    if (props.playingTaskId !== props.task.id && play.value) {
+  [() => props.playingTaskId, () => props.hideTime, isActive],
+  ([newPlayingTaskId, newHideTime, newIsActive]) => {
+    if (
+      (newPlayingTaskId !== props.task.id && play.value) ||
+      newHideTime ||
+      !newIsActive
+    ) {
       play.value = false;
     }
   },
 );
 
+// i think these be housed up the tree
 let timerId: NodeJS.Timeout;
-const { isActive, startTracking, stopTracking } = useActivityTracker();
 // sync time in DB
 watch(play, () => {
   if (!play.value) {
@@ -91,13 +106,6 @@ watch(play, () => {
     timerId = setInterval(() => {
       updateTaskTime(props.task.id, seconds.value);
     }, 30000);
-  }
-});
-
-watchEffect(() => {
-  if (!isActive.value) {
-    console.log("inactive");
-    play.value = false;
   }
 });
 

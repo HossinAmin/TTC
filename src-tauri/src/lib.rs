@@ -5,17 +5,26 @@ use tauri::{
     tray::{TrayIcon, TrayIconBuilder, TrayIconEvent},
     Manager,
 };
-
 use tauri_plugin_sql::{Migration, MigrationKind};
+
+use tauri::{AppHandle, Emitter};
 
 struct AppData {
     tray: TrayIcon,
+    window: tauri::WebviewWindow,
 }
 
 #[derive(Serialize, Deserialize)]
 struct MouseCoords {
     x: i32,
     y: i32,
+}
+
+#[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct TimerPayload {
+    task_id: String,
+    is_playing: bool,
 }
 
 #[tauri::command]
@@ -32,6 +41,48 @@ fn check_mouse_coords() -> MouseCoords {
 #[tauri::command]
 fn get_tray_id(state: tauri::State<AppData>) -> std::string::String {
     state.tray.id().0.clone()
+}
+
+#[tauri::command]
+fn start_window_drag(state: tauri::State<AppData>) {
+    print!("window draging");
+    state.window.start_dragging().unwrap();
+}
+
+#[tauri::command]
+fn open_floating_timer(
+    app: AppHandle,
+    state: tauri::State<AppData>,
+    task_id: String,
+    is_playing: bool,
+) {
+    state.window.show().expect("failed to show floating window");
+    app.emit(
+        "open-floating-timer",
+        TimerPayload {
+            task_id,
+            is_playing,
+        },
+    )
+    .unwrap();
+}
+
+#[tauri::command]
+fn close_floating_timer(
+    app: AppHandle,
+    state: tauri::State<AppData>,
+    task_id: String,
+    is_playing: bool,
+) {
+    state.window.show().expect("failed to show floating window");
+    app.emit(
+        "close-floating-timer",
+        TimerPayload {
+            task_id,
+            is_playing,
+        },
+    )
+    .unwrap();
 }
 
 pub fn run() {
@@ -74,7 +125,13 @@ pub fn run() {
                 .add_migrations("sqlite:mybdz.db", migrations)
                 .build(),
         )
-        .invoke_handler(tauri::generate_handler![check_mouse_coords, get_tray_id])
+        .invoke_handler(tauri::generate_handler![
+            check_mouse_coords,
+            get_tray_id,
+            start_window_drag,
+            open_floating_timer,
+            close_floating_timer,
+        ])
         .on_window_event(|window, event| match event {
             tauri::WindowEvent::CloseRequested { api, .. } => {
                 window.hide().unwrap();
@@ -86,23 +143,20 @@ pub fn run() {
             #[cfg(desktop)]
             {
                 app.manage(AppData {
-                    tray: TrayIconBuilder::new()
-                        .menu_on_left_click(false)
-                        .on_tray_icon_event(|tray, event| match event {
-                            TrayIconEvent::Click { .. } => {
-                                println!("left click pressed and released");
-                                // in this example, let's show and focus the main window when the tray is clicked
-                                let app = tray.app_handle();
-                                if let Some(window) = app.get_webview_window("main") {
-                                    let _ = window.show();
-                                    let _ = window.set_focus();
-                                }
-                            }
-                            _ => {
-                                println!("unhandled event {event:?}");
-                            }
-                        })
-                        .build(app)?,
+                    tray: TrayIconBuilder::new().build(app)?,
+                    window: tauri::WebviewWindowBuilder::new(
+                        app,
+                        "floating-window",
+                        tauri::WebviewUrl::App("tasks/floating".into()),
+                    )
+                    .decorations(false)
+                    .always_on_top(true)
+                    .minimizable(false)
+                    .maximizable(false)
+                    .min_inner_size(280.00, 128.00)
+                    .inner_size(280.00, 128.00)
+                    .visible(false)
+                    .build()?,
                 });
             }
 

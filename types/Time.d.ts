@@ -3,3 +3,8 @@ export type TimeObj = {
   m: number;
   s: number;
 };
+
+export type FloatingTimerPayload = {
+  taskId: string;
+  isPlaying: boolean;
+};

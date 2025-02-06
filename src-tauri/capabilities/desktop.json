@@ -1,9 +1,12 @@
 {
   "identifier": "desktop-capability",
   "platforms": ["macOS", "windows", "linux"],
-  "windows": ["main"],
+  "windows": ["main", "floating-window"],
   "permissions": [
     "positioner:default",
+    "core:default",
+    "sql:default",
+    "sql:allow-execute",
     "fs:default",
     "fs:allow-read-file",
     "fs:allow-read-dir",

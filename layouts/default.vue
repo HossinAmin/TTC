@@ -1,7 +1,7 @@
 <template>
   <div class="flex min-h-screen flex-col">
     <nav class="flex items-center justify-between bg-surface p-2">
-      <button class="flex" @click="isDrawerOpen = true">
+      <button class="flex" @click="isDrawerOpen = !isDrawerOpen">
         <Icon name="ic:round-menu" :size="32" />
       </button>
 
@@ -37,16 +37,18 @@
       <SideBar v-model:is-open="isDrawerOpen">
         <div class="flex flex-grow flex-col justify-between">
           <div class="flex flex-col gap-2">
-            <button class="flex self-end p-2">
-              <Icon
-                name="ic:round-close"
-                :size="32"
-                @click="isDrawerOpen = false"
-              />
-            </button>
-            <h1 class="px-3 text-xl font-semibold">Projects</h1>
+            <div class="flex items-center justify-between">
+              <h1 class="px-3 text-xl font-semibold">Projects</h1>
+              <button class="flex self-end p-2">
+                <Icon
+                  name="ic:round-close"
+                  :size="32"
+                  @click="isDrawerOpen = false"
+                />
+              </button>
+            </div>
             <ProjectCard
-              v-if="projects?.length !== 0"
+              v-if="projects?.length"
               v-for="project in projects"
               :project
               :selected="currentProject?.id === project.id"
@@ -54,7 +56,7 @@
           </div>
 
           <button
-            class="mx-4 my-2 flex items-center justify-center rounded-lg bg-primary py-2 font-bold shadow-2xl"
+            class="m-4 flex items-center justify-center rounded-lg bg-primary py-2 font-bold shadow-2xl"
             @click="
               isProjectModalOpen = true;
               currentProject = undefined;
