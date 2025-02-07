@@ -45,7 +45,7 @@ const timer = computed(() => ({
 }));
 
 const nuxtApp = useNuxtApp();
-const { seconds, time, play, pad } = useTimer();
+const { seconds, time, play } = useTimer();
 
 const { isActive, startTracking, stopTracking } = useActivityTracker();
 const toggleTimer = () => {
@@ -53,10 +53,7 @@ const toggleTimer = () => {
 };
 
 const closeFloatingTimer = () => {
-  invoke("close_floating_timer", {
-    taskId: task.value?.id,
-    isPlaying: play.value,
-  });
+  getCurrentWindow().close();
 };
 
 const getTask = async (taskId: string): Promise<Task | undefined> => {
@@ -86,7 +83,6 @@ listen<FloatingTimerPayload>("open-floating-timer", async (event) => {
 listen<FloatingTimerPayload>("close-floating-timer", async (event) => {
   play.value = false;
   await updateTaskTime(task.value?.id ?? "", seconds.value);
-  getCurrentWindow().close();
 });
 
 let timerId: NodeJS.Timeout;

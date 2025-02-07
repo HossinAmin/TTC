@@ -2,7 +2,7 @@
 use device_query::{DeviceQuery, DeviceState};
 use serde::{Deserialize, Serialize};
 use tauri::{
-    tray::{TrayIcon, TrayIconBuilder, TrayIconEvent},
+    tray::{TrayIcon, TrayIconBuilder},
     Manager,
 };
 use tauri_plugin_sql::{Migration, MigrationKind};
@@ -68,21 +68,9 @@ fn open_floating_timer(
 }
 
 #[tauri::command]
-fn close_floating_timer(
-    app: AppHandle,
-    state: tauri::State<AppData>,
-    task_id: String,
-    is_playing: bool,
-) {
-    state.window.show().expect("failed to show floating window");
-    app.emit(
-        "close-floating-timer",
-        TimerPayload {
-            task_id,
-            is_playing,
-        },
-    )
-    .unwrap();
+fn close_floating_timer(app: AppHandle, state: tauri::State<AppData>) {
+    state.window.show().expect("failed to hide floating window");
+    app.emit("close-floating-timer", {}).unwrap();
 }
 
 pub fn run() {
@@ -134,6 +122,12 @@ pub fn run() {
         ])
         .on_window_event(|window, event| match event {
             tauri::WindowEvent::CloseRequested { api, .. } => {
+                if window.label() == "floating-window" {
+                    window
+                        .app_handle()
+                        .emit("close-floating-timer", {})
+                        .expect("failed to emit close floating");
+                }
                 window.hide().unwrap();
                 api.prevent_close();
             }
