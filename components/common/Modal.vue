@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="isOpen"
-    class="fixed top-0 flex h-full w-full items-center justify-center bg-surface/80"
+    class="fixed left-0 top-0 flex h-full w-full items-center justify-center bg-surface/80"
   >
     <div
       class="min-w-[50%] rounded-xl border border-solid border-border bg-surface p-5"

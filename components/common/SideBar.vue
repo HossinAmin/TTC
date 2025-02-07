@@ -2,7 +2,7 @@
   <Transition name="drawer">
     <div
       v-if="isOpen"
-      class="flex min-h-[100%] min-w-[50%] flex-col bg-surface shadow-xl md:min-w-[30%]"
+      class="flex min-h-[100%] min-w-[30%] flex-col bg-surface shadow-xl"
     >
       <slot />
     </div>
