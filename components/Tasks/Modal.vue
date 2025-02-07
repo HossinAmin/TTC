@@ -8,7 +8,11 @@
 
       <div class="flex flex-col">
         <label>Description</label>
-        <textarea name="description" :value="task?.description" />
+        <textarea
+          class="max-h-48"
+          name="description"
+          :value="task?.description"
+        />
       </div>
 
       <div class="flex flex-col">
