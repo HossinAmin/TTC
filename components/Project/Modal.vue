@@ -19,6 +19,7 @@
       <div class="flex w-full justify-between px-5 py-10">
         <button
           class="rounded-lg bg-error px-10 py-2"
+          type="button"
           @click.prevent="closeModal"
         >
           Cancel

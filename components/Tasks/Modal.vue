@@ -23,11 +23,14 @@
       <div class="flex w-full justify-between px-5 py-10">
         <button
           class="rounded-lg bg-error px-10 py-2"
+          type="button"
           @click.prevent="closeModal"
         >
           Cancel
         </button>
-        <button class="rounded-lg bg-primary px-10 py-2">Create</button>
+        <button class="rounded-lg bg-primary px-10 py-2" type="submit">
+          Create
+        </button>
       </div>
     </form>
   </CommonModal>
