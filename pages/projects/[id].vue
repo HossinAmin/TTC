@@ -2,15 +2,19 @@
   <div
     class="flex w-full flex-grow flex-col gap-10 p-5 transition-all delay-100"
   >
-    <nav class="grid w-full grid-cols-3 items-center justify-between px-4">
-      <div class="flex flex-col gap-2 truncate">
-        <h1 class="text-4xl">{{ currentProject?.name }}</h1>
-        <p class="truncate text-lg text-text-light">
+    <nav
+      class="grid w-full grid-cols-[minmax(0,5fr),auto] items-end justify-between"
+    >
+      <div class="flex flex-col gap-2">
+        <h1 class="truncate text-ellipsis text-4xl">
+          {{ currentProject?.name }}
+        </h1>
+        <p class="truncate text-ellipsis text-lg text-text-light">
           {{ currentProject?.description }}
         </p>
       </div>
 
-      <p class="text-center text-4xl">
+      <p class="text-end text-xl">
         {{ timer?.hours }}:{{ timer?.minutes }}:{{ timer?.seconds }}
       </p>
     </nav>
@@ -46,15 +50,17 @@ const route = useRoute();
 const { currentProject } = useProjects();
 const { show: showConfirmationModal } = useConfModal();
 
-const { time } = useTimer();
-
 const { deleteTask } = useTasks(route.params.id.toString());
 
-const timer = computed(() => ({
-  hours: pad(time.value.h),
-  minutes: pad(time.value.m),
-  seconds: pad(time.value.s),
-}));
+const timer = computed(() => {
+  const time = sec2TimeObj(currentProject.value?.time ?? 0);
+
+  return {
+    hours: pad(time.h),
+    minutes: pad(time.m),
+    seconds: pad(time.s),
+  };
+});
 
 const handleEdit = (task: Task) => {
   isTaskModalOpen.value = true;
