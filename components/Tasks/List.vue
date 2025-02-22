@@ -49,7 +49,9 @@ const handlePlay = async (task: Task) => {
     playingTask.value = task;
     seconds.value = task.time;
     play.value = true;
-  } else if (task.id === playingTask.value?.id && play.value) {
+  }
+  // the playing tasks emits play event
+  else if (task.id === playingTask.value?.id && play.value) {
     updateTasksLocally();
     play.value = false;
     playingTask.value = undefined;
@@ -78,7 +80,6 @@ watch(play, () => {
     }, 30 * 1000);
   } else {
     clearInterval(timerId);
-    saveTasks();
     stopTracking();
   }
 });

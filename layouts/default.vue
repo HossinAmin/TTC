@@ -59,7 +59,7 @@
             class="m-4 flex items-center justify-center rounded-lg bg-primary py-2 font-bold shadow-2xl"
             @click="
               isProjectModalOpen = true;
-              currentProject = undefined;
+              editProject = undefined;
             "
           >
             <p>Create Project</p>
@@ -73,7 +73,7 @@
 
     <ProjectModal
       v-model:is-open="isProjectModalOpen"
-      :project="currentProject"
+      :project="editProject"
       @close="isProjectModalOpen = false"
     />
   </div>
@@ -82,9 +82,11 @@
 <script setup lang="ts">
 import { open } from "@tauri-apps/plugin-shell";
 import SideBar from "~/components/common/SideBar.vue";
+import type { Project } from "~/types/Project";
 
 const isDrawerOpen = ref(false);
 const isProjectModalOpen = ref(false);
+const editProject = ref<Project>();
 
 const router = useRouter();
 const route = useRoute();
@@ -95,6 +97,7 @@ const { show } = useConfModal();
 const handleSelect = (value: string) => {
   if (value === "EDIT") {
     isProjectModalOpen.value = true;
+    editProject.value = currentProject.value;
   } else if (value === "DELETE") {
     show("delete this project", confirmProjectDelete);
   }
@@ -102,14 +105,13 @@ const handleSelect = (value: string) => {
 
 const handleClose = () => {
   isProjectModalOpen.value = false;
-  currentProject.value = undefined;
 };
 
 const confirmProjectDelete = () => {
   if (currentProject.value?.id) {
     deleteProject(currentProject.value.id);
     handleClose();
-    router.replace("/projects");
+    router.replace(`/projects/${projects.value?.[0].id}`);
   } else {
     throw new Error("No project is selected");
   }

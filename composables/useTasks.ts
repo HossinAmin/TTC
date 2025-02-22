@@ -2,7 +2,7 @@ import { v7 } from "uuid";
 import type { Task } from "~/types/Tasks";
 
 export default function useTasks(projectId: string) {
-  const tasks = ref<Task[] | null>();
+  const tasks = useState<Task[] | null>("tasks");
 
   const { $db } = useNuxtApp();
 
