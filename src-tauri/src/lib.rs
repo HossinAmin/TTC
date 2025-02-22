@@ -1,3 +1,5 @@
+pub mod migration;
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 use device_query::{DeviceQuery, DeviceState};
 use serde::{Deserialize, Serialize};
@@ -5,7 +7,6 @@ use tauri::{
     tray::{TrayIcon, TrayIconBuilder},
     Manager,
 };
-use tauri_plugin_sql::{Migration, MigrationKind};
 
 use tauri::{AppHandle, Emitter};
 
@@ -74,43 +75,13 @@ fn close_floating_timer(app: AppHandle, state: tauri::State<AppData>) {
 }
 
 pub fn run() {
-    let migrations = vec![Migration {
-        version: 1,
-        description: "create_initial_tables",
-        sql: r###"
-            CREATE TABLE "Projects" (
-                "id"	TEXT NOT NULL UNIQUE,
-                "created_at"	TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                "name"	TEXT NOT NULL,
-                "description"	TEXT,
-                "link"	TEXT,
-                "time"	INTEGER NOT NULL DEFAULT 0,
-                "tasks_count"	INTEGER NOT NULL DEFAULT 0,
-                PRIMARY KEY("id")
-            );
-            
-            CREATE TABLE "Tasks" (
-                "id"	TEXT NOT NULL UNIQUE,
-                "created_at"	TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                "name"	TEXT NOT NULL,
-                "description"	TEXT,
-                "link"	TEXT,
-                "time"	INTEGER NOT NULL DEFAULT 0,
-                "project"	TEXT NOT NULL,
-                PRIMARY KEY("id"),
-                FOREIGN KEY("project") REFERENCES "Projects"("id")
-            );
-            "###,
-        kind: MigrationKind::Up,
-    }];
-
     tauri::Builder::default()
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_positioner::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(
             tauri_plugin_sql::Builder::new()
-                .add_migrations("sqlite:mybdz.db", migrations)
+                .add_migrations("sqlite:mybdz.db", migration::get_migrations())
                 .build(),
         )
         .invoke_handler(tauri::generate_handler![
