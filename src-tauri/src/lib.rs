@@ -25,6 +25,7 @@ struct MouseCoords {
 #[serde(rename_all = "camelCase")]
 struct TimerPayload {
     task_id: String,
+    seconds: u32,
     is_playing: bool,
 }
 
@@ -46,7 +47,7 @@ fn get_tray_id(state: tauri::State<AppData>) -> std::string::String {
 
 #[tauri::command]
 fn start_window_drag(state: tauri::State<AppData>) {
-    print!("window draging");
+    print!("window dragging");
     state.window.start_dragging().unwrap();
 }
 
@@ -55,6 +56,7 @@ fn open_floating_timer(
     app: AppHandle,
     state: tauri::State<AppData>,
     task_id: String,
+    seconds: u32,
     is_playing: bool,
 ) {
     state.window.show().expect("failed to show floating window");
@@ -62,6 +64,7 @@ fn open_floating_timer(
         "open-floating-timer",
         TimerPayload {
             task_id,
+            seconds,
             is_playing,
         },
     )
@@ -69,9 +72,43 @@ fn open_floating_timer(
 }
 
 #[tauri::command]
-fn close_floating_timer(app: AppHandle, state: tauri::State<AppData>) {
+fn sync_timer(
+    app: AppHandle,
+    state: tauri::State<AppData>,
+    task_id: String,
+    seconds: u32,
+    is_playing: bool,
+) {
+    state.window.show().expect("failed to show floating window");
+    app.emit(
+        "sync-timer",
+        TimerPayload {
+            task_id,
+            seconds,
+            is_playing,
+        },
+    )
+    .unwrap();
+}
+
+#[tauri::command]
+fn close_floating_timer(
+    app: AppHandle,
+    state: tauri::State<AppData>,
+    task_id: String,
+    seconds: u32,
+    is_playing: bool,
+) {
     state.window.show().expect("failed to hide floating window");
-    app.emit("close-floating-timer", {}).unwrap();
+    app.emit(
+        "close-floating-timer",
+        TimerPayload {
+            task_id,
+            seconds,
+            is_playing,
+        },
+    )
+    .unwrap();
 }
 
 pub fn run() {
@@ -89,16 +126,11 @@ pub fn run() {
             get_tray_id,
             start_window_drag,
             open_floating_timer,
+            sync_timer,
             close_floating_timer,
         ])
         .on_window_event(|window, event| match event {
             tauri::WindowEvent::CloseRequested { api, .. } => {
-                if window.label() == "floating-window" {
-                    window
-                        .app_handle()
-                        .emit("close-floating-timer", {})
-                        .expect("failed to emit close floating");
-                }
                 window.hide().unwrap();
                 api.prevent_close();
             }

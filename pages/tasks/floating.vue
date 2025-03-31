@@ -31,77 +31,54 @@ import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import type { FloatingTimerPayload } from "~/types/Time";
-import type { Task } from "~/types/Tasks";
 
 definePageMeta({
   layout: false,
 });
 
-const task = ref<Task>();
+const taskId = ref<string>();
+const { seconds, time, play } = useTimer();
+
 const timer = computed(() => ({
   hours: pad(time.value.h),
   minutes: pad(time.value.m),
   seconds: pad(time.value.s),
 }));
 
-const nuxtApp = useNuxtApp();
-const { seconds, time, play } = useTimer();
-
-const { isActive, startTracking, stopTracking } = useActivityTracker();
 const toggleTimer = () => {
   play.value = !play.value;
 };
 
-const closeFloatingTimer = () => {
+let timerId: NodeJS.Timeout;
+watch(play, () => {
+  if (play.value) {
+    timerId = setInterval(() => {
+      invoke("sync_timer", {
+        taskId: taskId.value,
+        seconds: seconds.value,
+        isPlaying: play.value,
+      });
+    }, 1000 * 30);
+  } else {
+    clearInterval(timerId);
+  }
+});
+
+const closeFloatingTimer = async () => {
+  await invoke("close_floating_timer", {
+    taskId: taskId.value,
+    seconds: seconds.value,
+    isPlaying: play.value,
+  });
+  play.value = false;
   getCurrentWindow().close();
 };
 
-const getTask = async (taskId: string): Promise<Task | undefined> => {
-  const results = await nuxtApp.$db.select<Task[]>(
-    "SELECT * FROM Tasks WHERE id = $1",
-    [taskId],
-  );
-
-  return results?.[0];
-};
-
-const updateTaskTime = async (id: string, time: number) => {
-  await nuxtApp.$db.execute("UPDATE Tasks SET time = $2 WHERE id = $1", [
-    id,
-    time,
-  ]);
-};
-
 listen<FloatingTimerPayload>("open-floating-timer", async (event) => {
-  task.value = await getTask(event.payload.taskId);
-  seconds.value = task.value?.time ?? 0;
+  console.log("open");
+
+  taskId.value = event.payload.taskId;
+  seconds.value = event.payload.seconds;
   play.value = event.payload.isPlaying;
-});
-
-//FIXME: remove all instances of `task.value?.id ?? ""`
-
-listen<FloatingTimerPayload>("close-floating-timer", async (event) => {
-  play.value = false;
-  await updateTaskTime(task.value?.id ?? "", seconds.value);
-});
-
-let timerId: NodeJS.Timeout;
-watch(play, () => {
-  if (!play.value) {
-    clearInterval(timerId);
-    updateTaskTime(task.value?.id ?? "", seconds.value);
-    stopTracking();
-  } else {
-    startTracking();
-    timerId = setInterval(() => {
-      updateTaskTime(task.value?.id ?? "", seconds.value);
-    }, 30000);
-  }
-});
-
-watchEffect(() => {
-  if (isActive.value) {
-    play.value = false;
-  }
 });
 </script>

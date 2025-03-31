@@ -6,5 +6,6 @@ export type TimeObj = {
 
 export type FloatingTimerPayload = {
   taskId: string;
+  seconds: number;
   isPlaying: boolean;
 };

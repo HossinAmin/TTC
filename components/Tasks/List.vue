@@ -4,11 +4,11 @@
       v-if="tasks?.length"
       v-for="task in tasks"
       v-bind="task"
-      :time="playingTask?.id === task.id && play ? seconds : task.time"
-      :is-playing="playingTask?.id === task.id && play"
-      :hide-time="playingTask?.id === task.id && isFloatingTimerOpen"
+      :time="play && playingTaskId === task.id ? seconds : task.time"
+      :is-playing="play && playingTaskId === task.id"
+      :hide-time="isFloatingTimerOpen && playingTaskId === task.id"
       @toggle-timer="handlePlay(task)"
-      @open-floating-timer="handleOpenFloatingTimer(task)"
+      @open-floating-timer="handleOpenFloatingTimer()"
       @edit="$emit('edit', task)"
       @delete="$emit('delete', task)"
     />
@@ -26,72 +26,97 @@ const props = defineProps<{
   projectId: string;
 }>();
 
+// sync tasks in DB every 30 seconds and on timer pause
+let timerId: NodeJS.Timeout;
+
 const isFloatingTimerOpen = ref(false);
-const playingTask = ref<Task>();
+const playingTaskId = ref<string>();
 
 const { play, seconds } = useTimer();
-const { tasks, getTasks, saveTasks } = useTasks(props.projectId);
+const { tasks, getTasks, updateTaskTime } = useTasks(props.projectId);
 const { startTracking, stopTracking } = useActivityTracker();
 
-const updateTasksLocally = () => {
-  const taskIndex =
-    tasks.value?.findIndex((item) => item.id === playingTask.value?.id) ?? -1;
+const syncTaskTime = async (seconds: number, taskId?: string) => {
+  if (!taskId) return;
+  const taskIndex = tasks.value?.findIndex((item) => item.id === taskId) ?? -1;
 
-  if (tasks.value?.[taskIndex]) {
-    tasks.value[taskIndex].time = seconds.value;
-  }
+  if (!tasks.value?.[taskIndex]) return;
+
+  tasks.value[taskIndex].time = seconds;
+  await updateTaskTime(tasks.value[taskIndex].id, seconds);
 };
 
 const handlePlay = async (task: Task) => {
-  // no playing task or switch bettwen playing tasks
-  if (task.id !== playingTask.value?.id) {
-    updateTasksLocally();
-    playingTask.value = task;
+  // when: no playing task then play must be false
+  //* then: start tracking,load seconds, turn play on, select playing task
+
+  // when: clicks again on playing task
+  //* then: stop tracking, turn play off, syncTimer
+
+  // when: clicking on a task while another one is playing
+  //* then: syncTimer, load seconds, select playing task
+
+  if (!playingTaskId.value) {
+    startTracking(stopTimer);
+
+    timerId = setInterval(() => {
+      // persist time every 30 seconds
+      syncTaskTime(seconds.value, playingTaskId.value);
+    }, 30 * 1000);
+
+    playingTaskId.value = task.id;
+    seconds.value = task.time;
+    play.value = true;
+  } else if (playingTaskId.value === task.id) {
+    stopTimer();
+    play.value = false;
+    playingTaskId.value = undefined;
+    syncTaskTime(seconds.value, task.id);
+  } else {
+    syncTaskTime(seconds.value, playingTaskId.value);
+    playingTaskId.value = task.id;
     seconds.value = task.time;
     play.value = true;
   }
-  // the playing tasks emits play event
-  else if (task.id === playingTask.value?.id && play.value) {
-    updateTasksLocally();
-    play.value = false;
-    playingTask.value = undefined;
-  }
 };
 
-const handleOpenFloatingTimer = async (task: Task) => {
+const stopTimer = () => {
+  stopTracking();
+  clearInterval(timerId);
   play.value = false;
+  playingTaskId.value = undefined;
+};
+
+const handleOpenFloatingTimer = async () => {
   isFloatingTimerOpen.value = true;
+  play.value = false;
   await invoke("open_floating_timer", {
-    taskId: task.id,
-    time: task.time,
-    isPlaying: play.value,
+    taskId: playingTaskId.value,
+    seconds: seconds.value,
+    isPlaying: true,
   });
 };
 
-// sync tasks in DB every 30 seconds and on timer pause
-let timerId: NodeJS.Timeout;
-watch(play, () => {
-  if (play.value) {
-    startTracking();
-    timerId = setInterval(() => {
-      if (playingTask.value) {
-        saveTasks();
-      }
-    }, 30 * 1000);
-  } else {
-    clearInterval(timerId);
-    stopTracking();
-  }
+listen<FloatingTimerPayload>("sync-timer", async (event) => {
+  await syncTaskTime(event.payload.seconds, event.payload.taskId);
+  await getTasks();
+});
+
+listen<FloatingTimerPayload>("close-floating-timer", async (event) => {
+  isFloatingTimerOpen.value = false;
+
+  playingTaskId.value = event.payload.isPlaying
+    ? event.payload.taskId
+    : undefined;
+  seconds.value = event.payload.seconds;
+  play.value = event.payload.isPlaying;
+
+  await syncTaskTime(event.payload.seconds, event.payload.taskId);
+  await getTasks();
 });
 
 onMounted(async () => {
   await getTasks();
-});
-
-listen<FloatingTimerPayload>("close-floating-timer", async () => {
-  await getTasks();
-  playingTask.value = undefined;
-  isFloatingTimerOpen.value = false;
 });
 
 onUnmounted(() => {
