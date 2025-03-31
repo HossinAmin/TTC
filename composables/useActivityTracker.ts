@@ -14,7 +14,7 @@ export default function useActivityTracker() {
   const { addToast } = useToast();
   const { $setTrayIconPlay, $resetTrayIcon } = useNuxtApp();
 
-  const startTracking = async () => {
+  const startTracking = async (callback?: () => void) => {
     coords = await invoke<{ x: number; y: number }>("check_mouse_coords");
 
     $setTrayIconPlay();
@@ -25,6 +25,7 @@ export default function useActivityTracker() {
         );
 
         if (coords.x === newCoords.x && coords.y === newCoords.y) {
+          callback?.();
           isActive.value = false;
           addToast(
             "User Inactive",
