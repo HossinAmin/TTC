@@ -32,6 +32,7 @@ let timerId: NodeJS.Timeout;
 const isFloatingTimerOpen = ref(false);
 const playingTaskId = ref<string>();
 
+const nuxtApp = useNuxtApp();
 const { play, seconds } = useTimer();
 const { tasks, getTasks, updateTaskTime } = useTasks(props.projectId);
 const { startTracking, stopTracking } = useActivityTracker();
@@ -88,6 +89,7 @@ const stopTimer = () => {
 };
 
 const handleOpenFloatingTimer = async () => {
+  clearInterval(timerId);
   isFloatingTimerOpen.value = true;
   play.value = false;
   await invoke("open_floating_timer", {
@@ -105,14 +107,15 @@ listen<FloatingTimerPayload>("sync-timer", async (event) => {
 listen<FloatingTimerPayload>("close-floating-timer", async (event) => {
   isFloatingTimerOpen.value = false;
 
-  playingTaskId.value = event.payload.isPlaying
-    ? event.payload.taskId
-    : undefined;
-  seconds.value = event.payload.seconds;
-  play.value = event.payload.isPlaying;
+  if (event.payload.isPlaying) {
+    seconds.value = event.payload.seconds;
+    play.value = true;
+  } else {
+    stopTimer();
+  }
 
-  await syncTaskTime(event.payload.seconds, event.payload.taskId);
-  await getTasks();
+  nuxtApp.$mainWindow.show();
+  nuxtApp.$mainWindow.setFocus();
 });
 
 onMounted(async () => {

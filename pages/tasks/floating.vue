@@ -36,6 +36,7 @@ definePageMeta({
   layout: false,
 });
 
+let timerId: NodeJS.Timeout;
 const taskId = ref<string>();
 const { seconds, time, play } = useTimer();
 
@@ -47,10 +48,6 @@ const timer = computed(() => ({
 
 const toggleTimer = () => {
   play.value = !play.value;
-};
-
-let timerId: NodeJS.Timeout;
-watch(play, () => {
   if (play.value) {
     timerId = setInterval(() => {
       invoke("sync_timer", {
@@ -62,23 +59,28 @@ watch(play, () => {
   } else {
     clearInterval(timerId);
   }
-});
+};
 
 const closeFloatingTimer = async () => {
-  await invoke("close_floating_timer", {
-    taskId: taskId.value,
-    seconds: seconds.value,
-    isPlaying: play.value,
-  });
-  play.value = false;
   getCurrentWindow().close();
 };
 
 listen<FloatingTimerPayload>("open-floating-timer", async (event) => {
-  console.log("open");
-
   taskId.value = event.payload.taskId;
   seconds.value = event.payload.seconds;
   play.value = event.payload.isPlaying;
+});
+
+listen<FloatingTimerPayload>("close-floating-timer", async () => {
+  await invoke("sync_timer", {
+    taskId: taskId.value,
+    seconds: seconds.value,
+    isPlaying: play.value,
+  });
+
+  play.value = false;
+  seconds.value = 0;
+  taskId.value = undefined;
+  clearInterval(timerId);
 });
 </script>

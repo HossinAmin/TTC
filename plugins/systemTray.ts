@@ -71,6 +71,7 @@ export default defineNuxtPlugin(async () => {
 
   return {
     provide: {
+      mainWindow,
       setTrayIconPlay,
       setTrayIconNotify,
       resetTrayIcon,

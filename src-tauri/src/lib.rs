@@ -24,7 +24,7 @@ struct MouseCoords {
 #[derive(Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct TimerPayload {
-    task_id: String,
+    task_id: Option<String>,
     seconds: u32,
     is_playing: bool,
 }
@@ -55,7 +55,7 @@ fn start_window_drag(state: tauri::State<AppData>) {
 fn open_floating_timer(
     app: AppHandle,
     state: tauri::State<AppData>,
-    task_id: String,
+    task_id: Option<String>,
     seconds: u32,
     is_playing: bool,
 ) {
@@ -72,36 +72,9 @@ fn open_floating_timer(
 }
 
 #[tauri::command]
-fn sync_timer(
-    app: AppHandle,
-    state: tauri::State<AppData>,
-    task_id: String,
-    seconds: u32,
-    is_playing: bool,
-) {
-    state.window.show().expect("failed to show floating window");
+fn sync_timer(app: AppHandle, task_id: Option<String>, seconds: u32, is_playing: bool) {
     app.emit(
         "sync-timer",
-        TimerPayload {
-            task_id,
-            seconds,
-            is_playing,
-        },
-    )
-    .unwrap();
-}
-
-#[tauri::command]
-fn close_floating_timer(
-    app: AppHandle,
-    state: tauri::State<AppData>,
-    task_id: String,
-    seconds: u32,
-    is_playing: bool,
-) {
-    state.window.show().expect("failed to hide floating window");
-    app.emit(
-        "close-floating-timer",
         TimerPayload {
             task_id,
             seconds,
@@ -127,10 +100,22 @@ pub fn run() {
             start_window_drag,
             open_floating_timer,
             sync_timer,
-            close_floating_timer,
         ])
         .on_window_event(|window, event| match event {
             tauri::WindowEvent::CloseRequested { api, .. } => {
+                if window.label() == "floating-window" {
+                    window
+                        .app_handle()
+                        .emit(
+                            "close-floating-timer",
+                            TimerPayload {
+                                task_id: None,
+                                seconds: 0,
+                                is_playing: false,
+                            },
+                        )
+                        .expect("failed to emit close floating");
+                }
                 window.hide().unwrap();
                 api.prevent_close();
             }
